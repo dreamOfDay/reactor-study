@@ -1,0 +1,15 @@
+server:
+  port: 8080
+spring:
+  r2dbc:
+    url: r2dbc:mysql://${ip}:${port}/fbw?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
+    username: ${username}
+    password: ${password}
+    pool:
+      validation-query: SELECT 1
+      enabled: true
+logging:
+  level:
+    org:
+      springframework:
+        r2dbc: DEBUG
