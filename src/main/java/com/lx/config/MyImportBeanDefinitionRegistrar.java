@@ -42,9 +42,9 @@ public class MyImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegi
         EnumSet.allOf(TransEnum.class)
                 .stream()
                 .map(TransEnum::getClazz)
-                .forEach(e -> {
-                    AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(e).getBeanDefinition();
-                    registry.registerBeanDefinition(e.getName(),beanDefinition);
+                .forEach(clazz -> {
+                    AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(clazz).getBeanDefinition();
+                    registry.registerBeanDefinition(clazz.getName(),beanDefinition);
                 });
 
 

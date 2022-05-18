@@ -37,6 +37,6 @@ public class TransController {
                 .map(TransEnum::valueOf)
                 .map(TransEnum::getClazz)
                 .map(clazz -> applicationContext.getBean(clazz))
-                .flatMap(e -> ServerResponse.ok().bodyValue(((Translater)e).trans()));
+                .flatMap(translater -> ServerResponse.ok().bodyValue(((Translater)translater).trans()));
     }
 }
