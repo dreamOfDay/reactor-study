@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.persistence.Table;
@@ -53,7 +54,6 @@ public class DBController {
 //    private final R2dbcRepository<TestEntity,Integer> testEntityRepository;
     private final DatabaseClient databaseClient;
     private final R2dbcEntityTemplate r2dbcEntityTemplate;
-    private final TestEntity testEntity;
 
     public Mono<ServerResponse> template(ServerRequest serverRequest) {
         // select * from test_entity where entity_name='myName2' sort by entity_id desc
@@ -90,8 +90,8 @@ public class DBController {
         // select * from test_entity where entity_name = 'myName2'
         // findByEntityName 为jpa的扩展方式
         return testEntityRepository
-                .findAll()
-//                .findByEntityName("myName2")
+//                .findAll()
+                .findByEntityName("myName2")
                 .log()
                 .collectList()
                 .flatMap(e -> ServerResponse.ok().bodyValue(e))
