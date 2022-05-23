@@ -23,13 +23,12 @@ import reactor.core.publisher.Mono;
 public class TransController {
 
     @Bean("transRounters")
-    public RouterFunction<ServerResponse> dbRouters() {
+    public RouterFunction<ServerResponse> transRouters() {
         return RouterFunctions.route()
                 .GET("trans", this::trans)
                 .build();
     }
 
-    @Autowired
     private final ApplicationContext applicationContext;
 
     private Mono<ServerResponse> trans(ServerRequest serverRequest) {
