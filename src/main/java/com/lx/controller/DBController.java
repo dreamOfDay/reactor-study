@@ -5,26 +5,17 @@ import com.lx.repository.TestEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.index.CandidateComponentsIndex;
-import org.springframework.context.index.CandidateComponentsIndexLoader;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
-import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.data.relational.core.query.Criteria;
 import org.springframework.data.relational.core.query.Query;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.persistence.Table;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @Author: jyu
@@ -47,6 +38,7 @@ public class DBController {
                 .GET(PATH_PREFIX + "repository", this::repository)
                 .GET(PATH_PREFIX + "databaseClient", this::databaseClient)
                 .GET(PATH_PREFIX + "template", this::template)
+                .GET(PATH_PREFIX + "transactionTest", this::transactionTest)
                 .build();
     }
 
@@ -71,11 +63,16 @@ public class DBController {
     }
 
     public Mono<ServerResponse> databaseClient(ServerRequest serverRequest) {
-        // select *
+        PageRequest pageRequest = PageRequest.of(
+                Integer.parseInt(serverRequest.queryParam("startPage").orElse("0")),
+                Integer.parseInt(serverRequest.queryParam("size").orElse("10"))
+        );
+        // select * limit #{startPage}.#{size}
         return databaseClient
                 .select()
                 .from("test_entity")
                 .as(TestEntity.class)
+                .page(pageRequest)
                 .fetch()
                 .all()
                 .log()
@@ -106,5 +103,12 @@ public class DBController {
 
 
     //todo 事务模式
+
+    public Mono<ServerResponse> transactionTest(ServerRequest serverRequest){
+
+
+        return ServerResponse.ok().build();
+    }
+
 
 }
