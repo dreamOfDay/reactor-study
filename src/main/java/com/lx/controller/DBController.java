@@ -131,7 +131,7 @@ public class DBController {
                     e.setEntityValue(e.getEntityValue() + flag.incrementAndGet());
                     return e;
                 })
-                .flatMap(e -> testEntityRepository.save(e))
+                .flatMap(testEntityRepository::save)
                 .flatMap(e -> ServerResponse.ok().bodyValue(e))
                 .as(transactionalOperator::transactional)
         ;
@@ -158,7 +158,7 @@ public class DBController {
                     e.setEntityValue(e.getEntityValue() + flag.incrementAndGet());
                     return e;
                 })
-                .flatMap(e -> testEntityRepository.save(e))
+                .flatMap(testEntityRepository::save)
                 .flatMap(e -> ServerResponse.ok().bodyValue(e))
                 ;
     }
