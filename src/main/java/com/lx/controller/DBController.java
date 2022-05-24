@@ -1,5 +1,6 @@
 package com.lx.controller;
 
+import com.lx.common.TransactionManagers;
 import com.lx.entity.TestEntity;
 import com.lx.repository.TestEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -143,7 +144,7 @@ public class DBController {
      * @return
      */
     // 如果是读操作，可以将以下 readOnly 注释解开
-    @Transactional(/*readOnly = true, */transactionManager = "connectionFactoryTransactionManager")
+    @Transactional(/*readOnly = true, */transactionManager = TransactionManagers.reactiveTransactionManager)
     public Mono<ServerResponse> testForTransactionManager(ServerRequest serverRequest){
         // 效果与 testForTransactionalOperator 方法所展示一致
         return testEntityRepository
