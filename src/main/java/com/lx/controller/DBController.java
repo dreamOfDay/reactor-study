@@ -116,19 +116,15 @@ public class DBController {
 
     public Mono<ServerResponse> testForTransactionalOperator(ServerRequest serverRequest){
         // 使用 transactionalOperator 示例
-        /**
-         * 注意这里只有第一次会成功，
-         * 因为 flag 第一次成功以后会变成1，第二次 flag 变成2的时候会抛出 “手动异常”，此时不仅数据库回滚，flag 的值也发生了回滚
-         */
         return testEntityRepository
                 .findById(9)
                 .log()
                 .map(e -> {
                     System.out.println(flag.get());
+                    e.setEntityValue(e.getEntityValue() + flag.incrementAndGet());
                     if (flag.get()%2 == 1){
                         throw new RuntimeException("手动异常!");
                     }
-                    e.setEntityValue(e.getEntityValue() + flag.incrementAndGet());
                     return e;
                 })
                 .flatMap(testEntityRepository::save)
@@ -152,10 +148,10 @@ public class DBController {
                 .log()
                 .map(e -> {
                     System.out.println(flag.get());
+                    e.setEntityValue(e.getEntityValue() + flag.incrementAndGet());
                     if (flag.get()%2 == 1){
                         throw new RuntimeException("手动异常!");
                     }
-                    e.setEntityValue(e.getEntityValue() + flag.incrementAndGet());
                     return e;
                 })
                 .flatMap(testEntityRepository::save)
