@@ -108,7 +108,7 @@ public class TestTransactionalService {
                 // step3 更新缓存
                 .flatMap( val -> {
                     /**
-                     * todo 不知道这里为什么不能交给事务管理器做到手动回滚，按照官方描述应该可以，这里不知道为啥，换了jdbc事务管理器也不行
+                     * todo 不知道这里为什么不能交给事务管理器做到自动回滚，按照官方描述应该可以，这里不知道为啥，换了jdbc事务管理器也不行
                      * <html>https://docs.spring.io/spring-data/redis/docs/current/reference/html/#tx.spring</html>
                      * 以上官方写到了如下描述，但是好像未生效
                      * <h2>
