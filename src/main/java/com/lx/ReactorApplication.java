@@ -15,7 +15,9 @@ import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 @SpringBootApplication
 @EnableR2dbcRepositories(basePackages = "com.lx.repository")
 public class ReactorApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(ReactorApplication.class, args);
     }
+
 }

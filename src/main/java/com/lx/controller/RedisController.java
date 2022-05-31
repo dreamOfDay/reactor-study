@@ -1,22 +1,17 @@
 package com.lx.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.lx.common.TransactionManagers;
 import com.lx.repository.TestEntityRepository;
+import com.lx.service.TestTransactionalService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Author: jyu
@@ -35,6 +30,7 @@ public class RedisController {
                 .GET(PATH_PREFIX + "get", this::get)
                 .GET(PATH_PREFIX + "testForTransactional", this::testForTransactional)
                 .GET(PATH_PREFIX + "testForTransactionalOperator", this::testForTransactionalOperator)
+                .GET(PATH_PREFIX + "testTransactionalByStringRedisTemplate", this::testTransactionalByStringRedisTemplate)
                 .build();
     }
 
@@ -46,6 +42,7 @@ public class RedisController {
      */
     private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
     private final TestTransactionalService testTransactionalService;
+
 
 
     // set key val
@@ -81,6 +78,10 @@ public class RedisController {
 
     public Mono<ServerResponse> testForTransactionalOperator(ServerRequest serverRequest) {
         return testTransactionalService.testForTransactionalOperator(serverRequest);
+    }
+
+    public Mono<ServerResponse> testTransactionalByStringRedisTemplate(ServerRequest serverRequest){
+        return testTransactionalService.testTransactionalByStringRedisTemplate(serverRequest);
     }
 
 }

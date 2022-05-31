@@ -1,10 +1,11 @@
-package com.lx.controller;
+package com.lx.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.lx.common.TransactionManagers;
 import com.lx.repository.TestEntityRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -31,6 +32,9 @@ public class TestTransactionalService {
     private final TestEntityRepository testEntityRepository;
     private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
     private final TransactionalOperator transactionalOperator;
+
+    // 非响应式 StringRedisTemplate
+    private final StringRedisTemplate stringRedisTemplate;
 
     private static final AtomicInteger flag = new AtomicInteger(0);
 
@@ -61,6 +65,7 @@ public class TestTransactionalService {
                 ;
     }
 
+
     public Mono<ServerResponse> testForTransactionalOperator(ServerRequest serverRequest) {
         return testEntityRepository
                 .findById(9)
@@ -84,6 +89,50 @@ public class TestTransactionalService {
                 .flatMap(e -> ServerResponse.ok().bodyValue(e))
                 .switchIfEmpty(ServerResponse.ok().build())
                 .as(transactionalOperator::transactional)
+                ;
+    }
+
+
+    @Transactional(rollbackFor = Exception.class, transactionManager = TransactionManagers.reactiveTransactionManager)
+    public Mono<ServerResponse> testTransactionalByStringRedisTemplate(ServerRequest serverRequest) {
+        return testEntityRepository
+                // step1 从数据库获取数据
+                .findById(9)
+                .log()
+                .map(e -> {
+                    e.setEntityValue(e.getEntityValue() + flag.incrementAndGet());
+                    return e;
+                })
+                // step2 更新数据库
+                .flatMap(testEntityRepository::save)
+                // step3 更新缓存
+                .flatMap( val -> {
+                    /**
+                     * todo 不知道这里为什么不能交给事务管理器做到手动回滚，按照官方描述应该可以，这里不知道为啥，换了jdbc事务管理器也不行
+                     * <html>https://docs.spring.io/spring-data/redis/docs/current/reference/html/#tx.spring</html>
+                     * 以上官方写到了如下描述，但是好像未生效
+                     * <h2>
+                     *     Transaction management requires a PlatformTransactionManager.
+                     *     Spring Data Redis does not ship with a PlatformTransactionManager implementation.
+                     *     Assuming your application uses JDBC, Spring Data Redis can participate in transactions by using existing transaction managers.
+                     * </h2>
+                     */
+                    // 手动开启 redis 的事务
+                    stringRedisTemplate.multi();
+                    stringRedisTemplate.opsForValue().set("test", JSONObject.toJSONString(val));
+                    if (flag.get()%2 == 1){
+                        return Mono.error(new RuntimeException("手动异常!"));
+                    }
+                    stringRedisTemplate.exec();
+                    return Mono.empty();
+                })
+                .onErrorResume(e -> {
+                    // 发生异常的时候回滚redis的事务，mysql的事务可以交给 @Transactional 回滚
+                    stringRedisTemplate.discard();
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                    return ServerResponse.badRequest().build();
+                })
+                .flatMap(e -> ServerResponse.ok().bodyValue(e))
                 ;
     }
 }

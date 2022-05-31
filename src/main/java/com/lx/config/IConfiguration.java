@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.r2dbc.core.DatabaseClient;
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.transaction.ReactiveTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.reactive.TransactionalOperator;
 
 /**
@@ -14,6 +15,7 @@ import org.springframework.transaction.reactive.TransactionalOperator;
  *
  **/
 @Configuration
+@EnableTransactionManagement//配置声明式事务管理
 public class IConfiguration {
 
     /**
