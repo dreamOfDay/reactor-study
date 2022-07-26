@@ -3,8 +3,7 @@ package com.lx.controller;
 import com.lx.event.AsyncTestEvent;
 import com.lx.event.TestEvent;
 import lombok.AllArgsConstructor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -24,24 +23,23 @@ public class TestEventController {
     private static final String PATH_PREFIX = "/event/";
 
     @Bean("eventRounters")
-    public RouterFunction<ServerResponse> redisRounters() {
+    public RouterFunction<ServerResponse> eventRounters() {
         return RouterFunctions.route()
                 .GET(PATH_PREFIX + "test", this::test)
                 .build();
     }
 
-    private ApplicationContext applicationContext;
+    private ApplicationEventPublisher eventPublisher;
 
     public Mono<ServerResponse> test(ServerRequest serverRequest) {
 
         return Mono.just(serverRequest.queryParam("eleId"))
-                .map(eleId -> {
-                    // 推送一个同步事件一个异步事件
+                .flatMap(eleId -> {
                     TestEvent testEvent = new TestEvent(this, eleId.get());
                     AsyncTestEvent asyncTestEvent = new AsyncTestEvent(this, eleId.get());
-                    applicationContext.publishEvent(testEvent);
-                    applicationContext.publishEvent(asyncTestEvent);
-                    return testEvent.getEleId();
+                    eventPublisher.publishEvent(testEvent);
+                    eventPublisher.publishEvent(asyncTestEvent);
+                    return Mono.empty().then(Mono.fromCallable(testEvent::getEleId));
                 })
                 .flatMap(e -> ServerResponse.ok().bodyValue(e))
         ;

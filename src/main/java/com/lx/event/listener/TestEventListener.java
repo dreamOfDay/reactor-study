@@ -33,6 +33,6 @@ public class TestEventListener {
     @Async
     @EventListener
     public void asyncTestEventListen(AsyncTestEvent asyncTestEvent){
-        log.info("get data from TestEventListen#getEleId: {}",asyncTestEvent.getEleId());
+        log.info("get data from AsyncTestEvent#getEleId: {}",asyncTestEvent.getEleId());
     }
 }
