@@ -44,6 +44,8 @@
 
 ##### 3.4 什么是回表？
 
+##### 3.5 undo log版本链 + Read View可见性规则
+
 
 
 ### 4. redis
@@ -116,7 +118,6 @@ JVM明确规定，必须在类的首次主动使用时才能执行类的初始�
 (3)synchronized是不可中断且无法获取锁状态,后者是可中断lockInterruptibly方法,同时也可获取锁的状态isLocked();
 (4)synchronized是不能精准唤醒的,ReentrantLock是可以依赖于Condition对象设置条件进行精准唤醒;
 (5)synchronized是jdk提供的关键字,Lock是普通的java类(接口),前者可锁方法或代码块,后者只能锁代码块;
-(6)synchronized是不会产生死锁,lock使用lock()方法和unlock()方法成对使用,否则产生死锁;
 ```
 
 [从ReentrantLock的实现看AQS的原理及应用](https://tech.meituan.com/2019/12/05/aqs-theory-and-apply.html)
@@ -338,6 +339,33 @@ Saga的并发度高，但是一致性弱，对于转账，可能发生用户已�
 ##### 3.4 什么是回表？
 
 [什么是 MySQL 的 回表](https://blog.csdn.net/firstcode666/article/details/123369219)
+
+
+
+##### 3.5 undo log版本链 + Read View可见性规则
+
+RR隔离级别实现原理，就是MVCC多版本并发控制，而MVCC是是通过`Read View+ Undo Log`实现的，Undo Log 保存了历史快照，Read View可见性规则帮助判断当前版本的数据是否可见。
+
+`Undo Log`版本链长这样：
+
+![1659404918182.jpg](./images/1659404918182.jpg)
+
+Read view 的几个重要属性
+
+- `m_ids`:当前系统中那些活跃(未提交)的读写事务ID, 它数据结构为一个List。
+- `min_limit_id`:表示在生成Read View时，当前系统中活跃的读写事务中最小的事务id，即m_ids中的最小值。
+- `max_limit_id`:表示生成Read View时，系统中应该分配给下一个事务的id值。
+- `creator_trx_id`: 创建当前Read View的事务ID
+
+Read view 可见性规则如下：
+
+1. 如果数据事务ID`trx_id < min_limit_id`，表明生成该版本的事务在生成Read View前，已经提交(因为事务ID是递增的)，所以该版本可以被当前事务访问。
+2. 如果`trx_id>= max_limit_id`，表明生成该版本的事务在生成Read View后才生成，所以该版本不可以被当前事务访问。
+3. 如果`min_limit_id =<trx_id< max_limit_id`,需要分3种情况讨论
+
+> - 3.1 如果`m_ids`包含`trx_id`,则代表Read View生成时刻，这个事务还未提交，但是如果数据的`trx_id`等于`creator_trx_id`的话，表明数据是自己生成的，因此是可见的。
+> - 3.2 如果`m_ids`包含`trx_id`，并且`trx_id`不等于`creator_trx_id`，则Read View生成时，事务未提交，并且不是自己生产的，所以当前事务也是看不见的；
+> - 3.3 如果`m_ids`不包含`trx_id`，则说明你这个事务在Read View生成之前就已经提交了，修改的结果，当前事务是能看见的。
 
 
 
