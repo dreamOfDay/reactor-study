@@ -196,9 +196,40 @@ FeignInvocationHandler 的实现：
 2）AutoConfigurationImportSelector类中重写了ImportSelector中selectImports方法，批量返回需要装配的配置类
 3）通过Spring提供的SpringFactoriesLoader机制，扫描classpath下的META-INF/spring.factories文件，读取需要自动装配的配置类
 4）依据条件筛选的方式，把不符合的配置类移除掉，最终完成自动装配
+
+部分核心注解作用
+(1)@SpringBootConfiguration：用来表明这是springboot的配置类
+
+    @Configuration：表明这是配置类
+
+         @Component: 表明配置类也是一个组件
+
+(2)@EnableAutoConfiguration: 用来表面开启自动配置
+
+    @AutoConfigurationPackage： 自动配置包
+
+        @Import({Registrar.class}): 导入组件
+
+             AutoConfigurationPackages.register: 获取主配置类(@springbootApplication标注的类)所在的包，并把这个包里所有的组件扫描到spring容器中
+
+    @Import({AutoConfigurationImportSelector.class}) : 告诉容器导入什么组件 
+
+        getAutoConfigurationEntry：获取自动配置的实体
+
+        getCandidateConfigurations：获取候选配置
+
+            SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),getBeanClassLoader()): 加载指定的factoryClass并进行实例化。
+
+            SpringFactoriesLoader.loadSpringFactories :    加载指定的factoryClass。
+
+                classLoader.getResources("META-INF/spring.factories") //从META-INF/spring.factories中获取资源
+
+               ClassLoader.getSystemResources("META-INF/spring.factories") //从META-INF/spring.factories中获取资源
 ```
 
 [SpringBoot自动装配原理及分析](https://baijiahao.baidu.com/s?id=1725265949551075777&wfr=spider&for=pc)
+
+[Spring源码深度解析](https://blog.csdn.net/u011067966/article/details/118080138)
 
 
 
