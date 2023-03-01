@@ -22,11 +22,13 @@
 
 ##### 2.3 springboot的自动装配过程
 
-##### 2.4 spring的事务？
+##### 2.4 refresh的执行过程
 
-##### 2.5 事务失效场景及其原因
+##### 2.5 spring的事务？
 
-##### 2.6 常见的分布式事务解决方案
+##### 2.6 事务失效场景及其原因
+
+##### 2.7 常见的分布式事务解决方案
 
 
 
@@ -233,13 +235,32 @@ FeignInvocationHandler 的实现：
 
 
 
-##### 2.4 spring的事务？
+##### 2.4 refresh的执行过程
+
+1. prepareRefresh：准备好环境变量，配置变量
+2. obtainFreshBeanFactory：创建或获取bean工厂
+3. prepareBeanFactory：准备bean工厂
+4. postProcessBeanFactory：子类去扩展bean工厂
+5. invokeBeanFactoryPostProcessors：自定义beanFactory后置处理器去扩展bean工厂
+6. registerBeanPostProcessors：准备bean后置处理器
+7. initMessageSource：为spring容器提供国际化功能
+8. initApplicationEventMulticaster：为spring容器提供事件发布器
+9. onRefresh：留给子类对spring容器进行扩展
+10. registerListeners：为spring容器注册监听器
+11. finishBeanFactoryInitialization：初始化剩余的非懒加载单例bean，执行bean后置处理器扩展
+12. finishRefresh：准备spring容器生命周期管理器，发布contextRefreshed事件
+
+原文链接 [Spring之refresh的12个步骤](https://blog.csdn.net/weixin_44390164/article/details/120695989)
+
+
+
+##### 2.5 spring的事务？
 
 [Spring事务实现原理](https://zhuanlan.zhihu.com/p/228451195)
 
 
 
-##### 2.5 事务失效场景及其原因
+##### 2.6 事务失效场景及其原因
 
 ```shell
 1. 数据库存储引擎不支持
@@ -254,7 +275,7 @@ FeignInvocationHandler 的实现：
 
 
 
-##### 2.6 常见的分布式事务解决方案
+##### 2.7 常见的分布式事务解决方案
 
 - 2PC(二阶段提交)方案、3PC
 
