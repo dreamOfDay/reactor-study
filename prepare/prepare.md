@@ -153,7 +153,7 @@ volatile关键字修饰的共享变量在转换成汇编语言时，会加上内
 
 ##### 2.1 feign的调用过程
 
-[Feign的原理](https://blog.csdn.net/xjk201/article/details/107645501)
+[OpenFeign调用服务的核心原理解析](https://blog.csdn.net/weixin_36488231/article/details/123570238)
 
 ```shell
 FeignInvocationHandler 的实现：
@@ -315,6 +315,18 @@ Saga的并发度高，但是一致性弱，对于转账，可能发生用户已�
 ##### 3.2 sql语句执行流程
 
 ![1657092863223.jpg](./images/1657092863223.jpg)
+
+
+
+这里特别补充一个点，来自链接 [.frm恢复数据结构_InnoDB 外存数据结构浅析](https://blog.csdn.net/weixin_30131105/article/details/112144032)：
+
+redo log 与 bin log 更新的过程中存在一次2PC提交，步骤如下：
+
+1. 先将更新的操作写到 Redo Log，此时流程标记为 prepare 状态；
+2. 更新 Binlog，此时需将 BinLog 刷回磁盘才能视为成功；
+3. 提交事务（此时还会清除该事务 Undo 日志），流程标记为 commit 状态。
+
+
 
 ##### 3.2 mysql里面有哪些锁？具体作用
 
